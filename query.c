@@ -12,6 +12,8 @@
 #include "alloc.h"
 #include "response.h"
 #include "query.h"
+#include <signal.h>
+#include <stdio.h>
 
 static int flagforwardonly = 0;
 
@@ -710,7 +712,6 @@ static int doit(struct query *z,int state)
         }
 
   log_stats();
-
 
   if (flagout || flagsoa || !flagreferral) {
     if (z->level) {

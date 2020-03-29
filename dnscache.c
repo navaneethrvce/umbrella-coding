@@ -22,6 +22,7 @@
 #include "log.h"
 #include "okclient.h"
 #include "droproot.h"
+#include <stdio.h>
 
 static int packetquery(char *buf,unsigned int len,char **q,char qtype[2],char qclass[2],char id[2])
 {
@@ -435,7 +436,8 @@ int main()
     response_hidettl();
   if (env_get("FORWARDONLY"))
     query_forwardonly();
-
+  //TODO-Do Status Check here
+  build_ok_ip_list();
   if (!roots_init())
     strerr_die2sys(111,FATAL,"unable to read servers: ");
 

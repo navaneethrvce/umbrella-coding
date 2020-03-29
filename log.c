@@ -94,6 +94,17 @@ void log_startup(void)
   line();
 }
 
+void log_dbg(char *msg)
+{
+  string(msg);
+  line();
+}
+
+void log_num(int num)
+{
+  number(num);
+  line();
+}
 void log_query(uint64 *qnum,const char client[4],unsigned int port,const char id[2],const char *q,const char qtype[2])
 {
   string("query "); number(*qnum); space();

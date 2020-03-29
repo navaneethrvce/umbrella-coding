@@ -4,6 +4,8 @@
 #include "uint64.h"
 
 extern void log_startup(void);
+extern void log_dbg(char *msg);
+extern void log_num(int num);
 
 extern void log_query(uint64 *,const char *,unsigned int,const char *,const char *,const char *);
 extern void log_querydrop(uint64 *);

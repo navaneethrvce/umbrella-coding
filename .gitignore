@@ -245,3 +245,4 @@
 !warn-shsgr
 !buffer_read.c
 !buffer_write.c
+!root/servers/myip.opendns.com

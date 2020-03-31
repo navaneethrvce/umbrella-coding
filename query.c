@@ -253,6 +253,7 @@ static int doit(struct query *z,int state)
     }
 
     byte_copy(key,2,DNS_T_CNAME);
+    //cache_delete(key, dlen + 2, &cachedlen, &ttl);
     cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
     if (cached) {
       if (typematch(DNS_T_CNAME,dtype)) {
@@ -269,6 +270,7 @@ static int doit(struct query *z,int state)
 
     if (typematch(DNS_T_NS,dtype)) {
       byte_copy(key,2,DNS_T_NS);
+      //cache_delete(key, dlen + 2, &cachedlen, &ttl);
       cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
       if (cached && (cachedlen || byte_diff(dtype,2,DNS_T_ANY))) {
 	log_cachedanswer(d,DNS_T_NS);
@@ -323,9 +325,12 @@ static int doit(struct query *z,int state)
 
     if (typematch(DNS_T_A,dtype)) {
       byte_copy(key,2,DNS_T_A);
+      //cache_delete(key,dlen+2,&cachedlen,&ttl);
+      //log_dbg("Did a delete");
       cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
       if (cached && (cachedlen || byte_diff(dtype,2,DNS_T_ANY))) {
 	if (z->level) {
+	  //log_dbg("logging cache");
 	  log_cachedanswer(d,DNS_T_A);
 	  while (cachedlen >= 4) {
 	    for (k = 0;k < 64;k += 4)

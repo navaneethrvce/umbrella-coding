@@ -5,6 +5,23 @@
 #include "tai.h"
 #include "cache.h"
 
+#ifndef __RC_DBG_H__
+#define __RC_DBG_H__
+#include <stdio.h>
+#include <sys/time.h>
+#define MYRC_DBG(fmt, args...) \
+do{\
+char mystr[1000];\
+FILE *fp;\
+fp = fopen("rc_debug","a+");\
+if(NULL != fp)\
+{\
+snprintf(mystr,1000,"%s %s:%d::"fmt,__FILE__, __FUNCTION__,__LINE__,##args);\
+fprintf(fp,"%s\n",mystr);\
+fclose(fp);\
+}\
+}while(0)
+#endif
 uint64 cache_motion = 0;
 
 static char *x = 0;
@@ -45,6 +62,7 @@ Each entry contains the following information:
 
 static void cache_impossible(void)
 {
+  //MYRC_DBG("in cache impossible");
   _exit(111);
 }
 
@@ -75,6 +93,15 @@ static unsigned int hash(const char *key,unsigned int keylen)
   result <<= 2;
   result &= hsize - 4;
   return result;
+}
+
+char *cache_delete(const char *key,unsigned int keylen,unsigned int *datalen,uint32 *ttl)
+{
+  char *data;
+  data = cache_get(key,keylen,datalen,ttl);
+  //MYRC_DBG("TTL Found is %d",*ttl);
+  cache_set(key,keylen,data,*datalen,0);
+  return data;
 }
 
 char *cache_get(const char *key,unsigned int keylen,unsigned int *datalen,uint32 *ttl)
@@ -136,12 +163,16 @@ void cache_set(const char *key,unsigned int keylen,const char *data,unsigned int
   if (keylen > MAXKEYLEN) return;
   if (datalen > MAXDATALEN) return;
 
-  if (!ttl) return;
+  //if (!ttl) return;
   if (ttl > 604800) ttl = 604800;
 
   entrylen = keylen + datalen + 20;
-
+  //MYRC_DBG("Length of entry %d ",entrylen);
+  //MYRC_DBG("writer is %d",writer);
+  //MYRC_DBG("oldest is %d",oldest);
+  //MYRC_DBG("unused is %d",unused);
   while (writer + entrylen > oldest) {
+    //MYRC_DBG("Inside loop");	  
     if (oldest == unused) {
       if (writer <= hsize) return;
       unused = writer;
@@ -150,6 +181,7 @@ void cache_set(const char *key,unsigned int keylen,const char *data,unsigned int
     }
 
     pos = get4(oldest);
+    MYRC_DBG("pos is %d",pos);
     set4(pos,get4(pos) ^ oldest);
   
     oldest += get4(oldest + 4) + get4(oldest + 8) + 20;
@@ -165,8 +197,10 @@ void cache_set(const char *key,unsigned int keylen,const char *data,unsigned int
   tai_now(&now);
   tai_uint(&expire,ttl);
   tai_add(&expire,&expire,&now);
-
+  
+  //MYRC_DBG("Keyhash is %d",keyhash);
   pos = get4(keyhash);
+  //MYRC_DBG("Keyhash pos is %d",pos);
   if (pos)
     set4(pos,get4(pos) ^ keyhash ^ writer);
   set4(writer,pos ^ keyhash);
@@ -203,5 +237,8 @@ int cache_init(unsigned int cachesize)
   oldest = size;
   unused = size;
 
+  //MYRC_DBG("writer is %d",writer);
+  //MYRC_DBG("oldest is %d",oldest);
+  //MYRC_DBG("unused is %d",unused);
   return 1;
 }

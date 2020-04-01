@@ -436,8 +436,13 @@ int main()
     response_hidettl();
   if (env_get("FORWARDONLY"))
     query_forwardonly();
-  //TODO-Do Status Check here
-  build_ok_ip_list();
+  
+  if (watch_ip_list() == -1)
+    log_dbg("Signal Handle register failed, dynamic Access list will not work");  
+  
+  if (build_ok_ip_list() == -1)
+     strerr_die2sys(111,FATAL,"unable to read ip: ");
+
   if (!roots_init())
     strerr_die2sys(111,FATAL,"unable to read servers: ");
 
